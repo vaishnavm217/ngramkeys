@@ -16,9 +16,9 @@ def main():
     try:
         os.mkdir(index_dir)
     except OSError:
-        print '%s is already exists' % index_dir
+        print('%s is already exists' % index_dir)
     if exists_in(index_dir):
-        choise = raw_input(
+        choise = input(
             'Previous Index Found\nOptions:\n1.Create new Index\n2.Incremental Indexing\nEnter your option:')
         if choise == '1':
             index_my_docs(index_dir, True)
@@ -26,23 +26,23 @@ def main():
             index_my_docs(index_dir)
             ch = raw_input('Do you want to optimize the index?(y/n):')
             if ch == 'y':
-                print 'Optimizing.Please wait...'
+                #print'Optimizing.Please wait...'
                 optimize_index()
-                print 'Optimizing Completed'
+                #print'Optimizing Completed'
         else:
-            print 'Wrong Option.Exiting....'
+            ##print'Wrong Option.Exiting....'
             sys.exit(0)
     else:
-        print 'No previous index found. Creating new....'
+        #print'No previous index found. Creating new....'
         index_my_docs(index_dir, True)
-    print 'Indexing Completed!'
+    #print'Indexing Completed!'
 
 
 def create_schema():
     """
     Function to create schema for the index to be created
     """
-    schema = Schema(title=NGRAMWORD(minsize=2,maxsize=4), _title=TEXT(stored=True))
+    schema = Schema(title=NGRAMWORDS(minsize=2,maxsize=4), name=ID(stored=True))
     return schema
 
 
@@ -54,7 +54,7 @@ def get_link_files():
     """
     base_dir = os.path.abspath('.') + '/' + extracted_dir
     link_files = []
-    print os.listdir(base_dir)
+    #printos.listdir(base_dir)
     for f in os.listdir(base_dir):
         link_files.append(base_dir + f)
     return link_files
@@ -96,9 +96,9 @@ def incremental_index(dirname):
         # Loop over the files in the filesystem
         for path in get_link_files():
             if path not in indexed_paths:
-                print 'File addng to index: ', path
+                #print'File addng to index: ', path
                 add_doc(writer, path)
-        print 'Committing :::'
+        #print'Committing :::'
         writer.commit()
 
 
@@ -112,7 +112,7 @@ def clean_index(dirname):
     link_files = get_link_files()
     for path in link_files:
         add_doc(writer, path)
-    print 'Committing :::'
+    #print'Committing :::'
     writer.commit()
 
 
@@ -123,26 +123,26 @@ def add_doc(writer, path):
     :param path: path of the file to add to index
     """
     al = set()
-    ngram = NgramAnalyzer(minsize=2,stoplist=None)
+    # ngram = NgramAnalyzer(minsize=2,stoplist=None)
     st = SimpleAnalyzer()
-    print 'Opening ', path
+    #print'Opening ', path
     try:
-        f_link = open(path, 'r')
+        f_link = open(path, 'rb')
         stories_file = pickle.load(f_link)
         f_link.close()
     except IOError:
-        print 'Unable to read %s file' % path
+        print('Unable to read %s file' % path)
     else:
-        for token in st(unicode(stories_file['content'])):
-            # print(token.text)
-            ng = ngram(token.text)
-            for ngrm in ng:
-                if ngrm.text+'$'+token.text not in al:
-                    al.add(ngrm.text+'$'+token.text)
-                    try:
-                        writer.add_document(key=unicode(ngrm.text),word=unicode(token.text))
-                    except Exception, e:
-                        print e
+        for token in st(stories_file['content']):
+            # #print(token.text)
+            # ng = ngram(token.text)
+            # for ngrm in ng:
+            #     if ngrm.text+'$'+token.text not in al:
+            #         al.add(ngrm.text+'$'+token.text)
+            try:
+                writer.update_document(title=token.text,name=token.text)
+            except Exception as e:
+                print(e)
 
 
 if __name__ == "__main__":
