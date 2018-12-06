@@ -1,11 +1,12 @@
 from whoosh.index import create_in
 from whoosh.index import open_dir
 from whoosh.index import exists_in
-from whoosh.analysis import StemmingAnalyzer
+from whoosh.analysis import StemmingAnalyzer,NgramAnalyzer,StandardAnalyzer,SimpleAnalyzer
 from whoosh.fields import *
 import os
 import pickle
 import sys
+
 
 index_dir = 'stories_index'
 extracted_dir = "extracted_docs/"
@@ -41,8 +42,7 @@ def create_schema():
     """
     Function to create schema for the index to be created
     """
-    schema = Schema(path=ID(stored=True), content=NGRAMWORDS(minsize=2, maxsize=10, stored=True, field_boost=1.0, tokenizer=None, at='start', queryor=False, sortable=False),
-                    link=TEXT(stored=True), title=TEXT(stored=True))
+    schema = Schema(title=NGRAMWORD(minsize=2,maxsize=4), _title=TEXT(stored=True))
     return schema
 
 
@@ -122,6 +122,9 @@ def add_doc(writer, path):
     :param writer: the index writer
     :param path: path of the file to add to index
     """
+    al = set()
+    ngram = NgramAnalyzer(minsize=2,stoplist=None)
+    st = SimpleAnalyzer()
     print 'Opening ', path
     try:
         f_link = open(path, 'r')
@@ -130,11 +133,16 @@ def add_doc(writer, path):
     except IOError:
         print 'Unable to read %s file' % path
     else:
-        try:
-            writer.add_document(path=unicode(path), content=unicode(stories_file['content']), link=unicode(stories_file['url']),
-                                title=unicode(stories_file['title']))
-        except Exception, e:
-            print e
+        for token in st(unicode(stories_file['content'])):
+            # print(token.text)
+            ng = ngram(token.text)
+            for ngrm in ng:
+                if ngrm.text+'$'+token.text not in al:
+                    al.add(ngrm.text+'$'+token.text)
+                    try:
+                        writer.add_document(key=unicode(ngrm.text),word=unicode(token.text))
+                    except Exception, e:
+                        print e
 
 
 if __name__ == "__main__":
