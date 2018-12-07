@@ -2,9 +2,9 @@ index_dir = 'stories_index'
 import operator
 import urllib
 from whoosh.index import open_dir
-from whoosh.qparser import QueryParser
-from whoosh.query import Every
-from whoosh.analysis import StemmingAnalyzer,NgramAnalyzer,StandardAnalyzer,SimpleAnalyzer
+from whoosh.qparser import QueryParser,OrGroup
+from whoosh.query import FuzzyTerm
+from whoosh.analysis import NgramAnalyzer,SimpleAnalyzer
 
 
 def main():
@@ -20,11 +20,11 @@ def main():
     # for word in words:
     #     if word:
     #         queryString = queryString + " " + word # would be better to actually create a query
-    qp = QueryParser('title',schema=ix.schema)
+    qp = QueryParser('title',schema=ix.schema,group=OrGroup)
     corrector = ix.searcher().corrector("name")
     print(corrector.suggest(q, limit=3))
     # all_results = ix.searcher().search(qp.parse(''))
-    print(qp.parse(' '.join([token.text for token in ngramanalyzer(q)])))
+    print(qp.parse(' '.join([token.text for token in ngramanalyzer(q)]),))
     all_results = ix.searcher().search(qp.parse(' '.join([token.text for token in ngramanalyzer(q)])))
     Finalres = set()
     finalresult = []

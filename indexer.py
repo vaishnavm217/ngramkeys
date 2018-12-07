@@ -9,7 +9,7 @@ import sys
 
 
 index_dir = 'stories_index'
-extracted_dir = "extracted_docs/"
+extracted_dir = "Files/"
 
 
 def main():
@@ -128,12 +128,20 @@ def add_doc(writer, path):
     #print'Opening ', path
     try:
         f_link = open(path, 'rb')
-        stories_file = pickle.load(f_link)
+        stories_file = {'content':f_link.read().decode()}
         f_link.close()
+        prev = None
     except IOError:
         print('Unable to read %s file' % path)
     else:
         for token in st(stories_file['content']):
+            # if prev is None:
+            #     prev = token.text
+            #     continue
+            if token.text in al:
+                continue
+            al.add(token.text)
+            print("{}\r",len(al))
             # #print(token.text)
             # ng = ngram(token.text)
             # for ngrm in ng:
@@ -143,6 +151,7 @@ def add_doc(writer, path):
                 writer.update_document(title=token.text,name=token.text)
             except Exception as e:
                 print(e)
+            # prev = token.text
 
 
 if __name__ == "__main__":

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body>
+Henlo. server works
+<form>
+  <input id="query" type="text">
+</form>
+<p id="output"></p>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+<script>
+var typingTimer;                //timer identifier
+var doneTypingInterval = 300;  //time in ms (5 seconds)
+
+//on keyup, start the countdown
+$('#query').keyup(function(){
+    clearTimeout(typingTimer);
+    if ($('#query').val()) {
+        typingTimer = setTimeout(doneTyping, doneTypingInterval);
+    }
+});
+function doneTyping() {
+  //var msg = "Handler for .keyup() called " + xTriggered + " time(s).";
+  $.post('{% url "load" %}',{data:$('#query').val()}).done(function(data){
+    console.log("GOING!",JSON.stringify(data))
+    $("#output").html(JSON.stringify(data))
+  });
+}
+
+</script>
+</body>
+
+</html>
