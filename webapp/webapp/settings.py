@@ -19,6 +19,7 @@ from whoosh.analysis import SimpleAnalyzer
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WHOOSH_INDEX = os.path.join(BASE_DIR,"indexes")
 WHOOSH_FILES = os.path.join(BASE_DIR,"Files")
+WHOOSH_INDEX_NAME = 'Wiki'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'j_kf(d2$3s%j3y%d9gsep-yg+vdn%cv_n2r5)p0ij#i!r#ssb8'
 
@@ -146,7 +147,7 @@ def clean_index(dirname):
     Function to create index from scratch
     :param dirname: path of the index_dir
     """
-    ix = create_in(dirname, schema=create_schema())
+    ix = create_in(dirname, schema=create_schema(),indexname=WHOOSH_INDEX_NAME)
     writer = ix.writer()
     link_files = get_link_files()
     for path in link_files:
@@ -173,21 +174,15 @@ def add_doc(writer, path):
         print('Unable to read %s file' % path)
     else:
         for token in st(stories_file['content']):
-            # if prev is None:
-            #     prev = token.text
-            #     continue
-            if token.text in al:
+            # if not token.text.isalpha():
+            #     print("{}:{}".format(token.text,token.text.isalpha()))
+            if token.text in al or (not token.text.isalpha()):
                 continue
             al.add(token.text)
             print("{}\r".format(len(al)),end="")
-            # #print(token.text)
-            # ng = ngram(token.text)
-            # for ngrm in ng:
-            #     if ngrm.text+'$'+token.text not in al:
-            #         al.add(ngrm.text+'$'+token.text)
             try:
                 writer.update_document(title=token.text,name=token.text)
             except Exception as e:
                 print(e)
-if not exists_in(WHOOSH_INDEX):
+if not exists_in(WHOOSH_INDEX,indexname=WHOOSH_INDEX_NAME):
     clean_index(WHOOSH_INDEX)

@@ -7,11 +7,11 @@ from whoosh.analysis import NgramAnalyzer,SimpleAnalyzer
 from whoosh.index import open_dir
 from whoosh.qparser import QueryParser
 # Create your views here.
-ix = open_dir(settings.WHOOSH_INDEX)
+ix = open_dir(settings.WHOOSH_INDEX,indexname=settings.WHOOSH_INDEX_NAME)
 tokenizer = SimpleAnalyzer()
 searcher = ix.searcher()
 corrector = searcher.corrector("name")
-ngram = NgramAnalyzer(minsize=2)
+ngram = NgramAnalyzer(minsize=2,maxsize=4)
 qp = QueryParser('title',schema=ix.schema)
 
 def mainpage(request):
