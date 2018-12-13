@@ -19,11 +19,19 @@ def mainpage(request):
 
 @csrf_exempt
 def load(request):
+    global qp,ix,searcher,corrector,tokenizer,ngram
     data = request.POST.get('data')
+    index = request.POST.get('index')
     last = None
     for token in tokenizer(data):
         last = token.text
-    print(last)
+    print(last,index,settings.WHOOSH_INDEX_NAME)
+    if not index == settings.WHOOSH_INDEX_NAME:
+        ix = open_dir(settings.WHOOSH_INDEX,indexname=settings.WHOOSH_INDEX_NAME)
+        searcher = ix.searcher()
+        corrector = searcher.corrector("name")
+        qp = QueryParser('title',schema=ix.schema)
+        settings.WHOOSH_INDEX_NAME = index
     query = qp.parse(' '.join([token.text for token in ngram(last)]),)
     all_results = searcher.search(query)
     Finalres = set()

@@ -82,7 +82,7 @@ $('#query').keyup(function(){
 });
 function doneTyping() {
   //var msg = "Handler for .keyup() called " + xTriggered + " time(s).";
-  $.post('{% url "load" %}',{data:$('#query').val()}).done(function(data){
+  $.post('{% url "load" %}',{data:$('#query').val(),index:$("input[name='index']:checked").val()}).done(function(data){
     // console.log("GOING!",JSON.stringify(data))
     correction = data['correction']
     suggestion = data['suggestion']

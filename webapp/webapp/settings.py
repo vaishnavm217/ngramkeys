@@ -16,10 +16,16 @@ from whoosh.index import open_dir
 from whoosh.fields import *
 from whoosh.analysis import SimpleAnalyzer
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import re
+
+def only_letters(tested_string):
+    match = re.match("^[ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]*$", tested_string)
+    return match is not None
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WHOOSH_INDEX = os.path.join(BASE_DIR,"indexes")
 WHOOSH_FILES = os.path.join(BASE_DIR,"Files")
-WHOOSH_INDEX_NAME = 'Wiki'
+WHOOSH_INDEXES = ['wiki','blog','twitter','news']
+WHOOSH_INDEX_NAME = WHOOSH_INDEXES[0]
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'j_kf(d2$3s%j3y%d9gsep-yg+vdn%cv_n2r5)p0ij#i!r#ssb8'
 
@@ -176,7 +182,7 @@ def add_doc(writer, path):
         for token in st(stories_file['content']):
             # if not token.text.isalpha():
             #     print("{}:{}".format(token.text,token.text.isalpha()))
-            if token.text in al or (not token.text.isalpha()):
+            if token.text in al or (not only_letters(token.text)):
                 continue
             al.add(token.text)
             print("{}\r".format(len(al)),end="")
